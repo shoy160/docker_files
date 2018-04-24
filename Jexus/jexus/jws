@@ -1,0 +1,144 @@
+#!/bin/sh
+
+JWS_HOME=$(cd $(dirname $0);pwd)
+
+export LANG="zh_CN.UTF-8"
+export LD_LIBRARY_PATH=${JWS_HOME}/runtime/lib:$LD_LIBRARY_PATH
+export PATH=${JWS_HOME}/runtime/bin:$PATH
+
+# export MONO_IOMAP="all"
+# export MONO_MANAGED_WATCHER="disable"
+# export MONO_EXTERNAL_ENCODINGS="gbk:gb18030:gb2312"
+# export MONO_STRICT_MS_COMPLIANT="yes"
+# export MONO_GC_PARAMS="max-heap-size=4g"
+# export MONO_DISABLE_AIO=1
+export MONO_ASPNET_WEBCONFIG_CACHESIZE=8192
+export MONO_THREADS_PER_CPU=2000
+
+
+
+ulimit -SHn 20000 >/dev/null 2>&1
+
+jws_status_val=
+
+get_status()
+{
+    for i in 0 0 0 0 0 0 0 0 0 0 0
+    do
+      sleep 1
+      pid=`cat /var/run/jexus/jws.pid 2>/dev/null`
+      if [ "$pid" = "" ]; then
+         continue
+      fi
+
+      jws_status_val=`ps -p $pid | grep $pid | wc -l`
+      if [ $jws_status_val -ge 1 ]; then
+         jws_status_val=1
+         return
+      fi
+    done
+    jws_status_val=0
+}
+
+wait_new()
+{
+  pid=`cat /var/run/jexus/jws.pid 2>/dev/null`
+  if [ "$pid" = "" ]; then
+    return
+  fi
+
+  for i in 0 0 0 0 0 0 0 0 0 0
+  do
+    sleep 1
+    p=`cat /var/run/jexus/jws.pid 2>/dev/null`
+    if [ "$p" = "" ]; then
+      continue
+    fi     
+
+    if [ $pid != $p ]; then
+      return
+    fi
+  done
+}
+
+
+case "$1" in
+
+  start)
+    if [ "x$2" != "x" ]; then
+      if [ "$2" = "-D" ]; then
+        ${JWS_HOME}/jwss
+        exit 0
+      fi
+      ${JWS_HOME}/jwss -reapp "$2"
+      exit 0
+    fi
+    echo -n "Starting ... "
+    ${JWS_HOME}/jwss >/dev/null 2>&1 &
+
+    wait_new
+    get_status
+    if [ $jws_status_val -eq 1 ]; then
+      echo "OK"
+    else
+      echo "Failure"
+    fi
+    ;;
+
+  stop)
+    if [ "x$2" != "x" ]; then
+      ${JWS_HOME}/jwss -stop "$2"
+      exit 0
+    fi
+    ${JWS_HOME}/jwss -stop
+    ;;
+
+  restart)
+    if [ "x$2" != "x" ]; then
+      if [ "$2" = "-D" ]; then
+        ${JWS_HOME}/jwss
+        exit 0
+      fi
+      ${JWS_HOME}/jwss -reapp "$2"
+      exit 0
+    fi
+    echo -n "Restarting ... "
+    ${JWS_HOME}/jwss >/dev/null 2>&1 &
+
+    wait_new
+    get_status
+    if [ $jws_status_val -eq 1 ]; then
+      echo "OK"
+    else
+      echo "Failure"
+    fi
+    ;;
+
+  regsvr)
+    chmod +x ${JWS_HOME}/jwss
+    chmod +x ${JWS_HOME}/runtime/bin/mcs
+    python ${JWS_HOME}/def.py > ${JWS_HOME}/os.def 2>/dev/null 
+ ;;
+
+  status)
+    get_status
+    if [ $jws_status_val -eq 1 ]; then
+      echo "Jexus is running."
+      exit 0
+    fi
+    echo "Jexus has stopped."
+    exit 3
+    ;;
+
+  -v | -V)
+    ${JWS_HOME}/jwss -V
+    ;;
+
+  *)
+    echo "Usage: jws {start|stop|restart|regsvr|status|-v}"
+    exit 1
+
+esac
+
+
+exit 0

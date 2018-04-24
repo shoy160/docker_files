@@ -1,0 +1,3 @@
+#!/bin/sh
+JWS_PATH=$(cd $(dirname $0);pwd)
+exec ${JWS_PATH}/jwss mozroots "$@"

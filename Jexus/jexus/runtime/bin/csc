@@ -1,0 +1,5 @@
+#!/bin/sh
+# export MONO_ENV_OPTIONS=''
+ME=$(cd $(dirname $0);pwd)
+JWS_PATH=$(cd $(dirname $ME/../../jwss);pwd)
+exec ${JWS_PATH}/jwss --csc "$@"
