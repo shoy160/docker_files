@@ -17,7 +17,7 @@ RUN sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft
 RUN apt-get update && apt-get install -y dotnet-sdk-2.1.4
 
 #安装nodejs
-RUN curl -sL https://deb.nodesource.com/setup_4.x | bash - && apt-get install -y nodejs
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && apt-get install -y nodejs
 
 #修改时区
 ENV TZ=Asia/Shanghai
