@@ -1,0 +1,27 @@
+FROM jenkins/jenkins
+
+USER root
+#清除了基础镜像设置的源，切换成腾讯云的jessie源
+#使用非腾讯云环境的需要将 tencentyun 改为 aliyun
+RUN echo '' > /etc/apt/sources.list.d/jessie-backports.list \
+  && echo "deb http://mirrors.aliyun.com/debian jessie main contrib non-free" > /etc/apt/sources.list \
+  && echo "deb http://mirrors.aliyun.com/debian jessie-updates main contrib non-free" >> /etc/apt/sources.list \
+  && echo "deb http://mirrors.aliyun.com/debian-security jessie/updates main contrib non-free" >> /etc/apt/sources.list
+
+#安装.net core sdk
+RUN apt-get update && apt-get install -y curl libunwind8 gettext apt-transport-https
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+RUN mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
+RUN sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/dotnetdev.list'
+#dotnet-sdk-2.1.4 dotnet-runtime-2.0.5
+RUN apt-get update && apt-get install -y dotnet-sdk-2.1.4
+
+#安装nodejs
+RUN curl -sL https://deb.nodesource.com/setup_4.x | bash - && apt-get install -y nodejs
+
+#修改时区
+ENV TZ=Asia/Shanghai
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+USER jenkins

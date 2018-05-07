@@ -1,0 +1,26 @@
+FROM jenkins/jenkins:alpine
+USER root
+# 安装newman
+# Set node version
+ENV NODE_VERSION 8.9.3
+
+# Set locale
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+
+# Install node
+RUN apk add --update nodejs=${NODE_VERSION}-r1;
+
+# Set newman version
+ENV NEWMAN_VERSION 3.9.2
+
+# Install newman
+RUN npm install -g newman@${NEWMAN_VERSION};
+
+#修改时区
+ENV TZ=Asia/Shanghai
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+USER jenkins
