@@ -19,6 +19,7 @@ COPY ./jexus /usr/jexus
 EXPOSE 80
 WORKDIR /usr/jexus
 CMD /usr/jexus/jwss
+# CMD /usr/jexus/jws start && tail -f
 
 #docker build -t icb-jexus .
 #docker run --name icb-app-open -d -p 89:80 -v /var/www/acb.app:/var/www/default --restart always --privileged=true icb-jexus
