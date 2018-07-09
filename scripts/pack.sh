@@ -51,6 +51,7 @@ name="Acb.${name}.Contracts"
 
 push_pack(){
     echo "pack ${name} -v ${version}"
+    dotnet build -c Release "${dir}/${name}/${name}.csproj"
     dotnet pack /property:PackageVersion=${version} -c Release "${dir}/${name}/${name}.csproj"
     echo " nuget push"
     dotnet nuget push ${dir}/${name}/bin/Release/${name}.${version}.nupkg -k ${nuget_key} -s ${nuget_url}
