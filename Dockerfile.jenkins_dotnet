@@ -10,17 +10,24 @@ RUN echo '' > /etc/apt/sources.list.d/jessie-backports.list \
 
 #安装.net core sdk
 RUN apt-get update && apt-get install -y curl libunwind8 gettext apt-transport-https
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-RUN mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
-RUN sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/dotnetdev.list'
-#dotnet-sdk-2.1.4 dotnet-runtime-2.0.5
-RUN apt-get update && apt-get install -y dotnet-sdk-2.1.4
+
+RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg \
+  && mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/ \
+  && wget -q https://packages.microsoft.com/config/debian/9/prod.list \
+  && mv prod.list /etc/apt/sources.list.d/microsoft-prod.list \
+  && chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg \
+  && chown root:root /etc/apt/sources.list.d/microsoft-prod.list
+
+RUN apt-get update \
+  && apt-get install -y dotnet-sdk-2.1 sudo \
+  && rm -rf /var/lib/apt/lists/* \
+  && echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
 
 #sudo
-RUN apt-get update \
-  && apt-get install -y sudo \
-  && rm -rf /var/lib/apt/lists/*
-RUN echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
+# RUN apt-get update \
+#   && apt-get install -y sudo \
+#   && rm -rf /var/lib/apt/lists/*
+# RUN echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
 
 #修改时区
 ENV TZ=Asia/Shanghai
