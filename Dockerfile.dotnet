@@ -1,4 +1,4 @@
-﻿FROM microsoft/dotnet:2.1-runtime
+﻿FROM microsoft/dotnet:2.1.6-aspnetcore-runtime
  
 #设置Docker容器对外暴露5000端口
 EXPOSE 5000
@@ -7,12 +7,12 @@ EXPOSE 5000
 ENV ASPNETCORE_URLS http://*:5000
 
 # set up the runtime store
-RUN for version in '2.0.0' '2.0.3' '2.0.5' '2.0.6' '2.0.7' '2.0.8'; do \
-        curl -o /tmp/runtimestore.tar.gz https://dist.asp.net/runtimestore/$version/linux-x64/aspnetcore.runtimestore.tar.gz \
-        && export DOTNET_HOME=$(dirname $(readlink $(which dotnet))) \
-        && tar -x -C $DOTNET_HOME -f /tmp/runtimestore.tar.gz \
-        && rm /tmp/runtimestore.tar.gz; \
-    done
+#RUN for version in '2.0.0' '2.0.3' '2.0.5' '2.0.6' '2.0.7' '2.0.8'; do \
+#        curl -o /tmp/runtimestore.tar.gz https://dist.asp.net/runtimestore/$version/linux-x64/aspnetcore.runtimestore.tar.gz \
+#        && export DOTNET_HOME=$(dirname $(readlink $(which dotnet))) \
+#        && tar -x -C $DOTNET_HOME -f /tmp/runtimestore.tar.gz \
+#        && rm /tmp/runtimestore.tar.gz; \
+#    done
 
 #设置工作目录为 `/publish` 文件夹，即容器启动默认的文件夹
 WORKDIR /publish
@@ -22,6 +22,8 @@ WORKDIR /publish
 
 RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo "Asia/Shanghai" > /etc/timezone && \
     echo "\ndeb http://ftp.de.debian.org/debian jessie main" >> /etc/apt/source.list && \
-    apt-get update && apt-get install -y libgdiplus && ln -s /usr/lib/libgdiplus.so /publish/gdiplus.dll
+    apt-get update && apt-get install -y libgdiplus && rm -rf /var/lib/apt/lists/* && ln -s /usr/lib/libgdiplus.so /publish/gdiplus.dll
 
-ENTRYPOINT ["start.sh"]
+RUN echo "\ndotnet --list-runtimes" >> /publish/start.sh
+
+ENTRYPOINT ["sh","start.sh"]
