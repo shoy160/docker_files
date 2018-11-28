@@ -2,25 +2,19 @@ FROM jenkins/jenkins:alpine
 
 USER root
 
-#ndoejs
-ENV NODEJS_VERSION 8.9.3
-
 # Set locale
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
 # Install node
-RUN apk add --update nodejs=${NODE_VERSION}-r1 \
+RUN apk add --update nodejs nodejs-npm \
     && apk add --update sudo \
     && echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
 
 # dependencies
 RUN npm config set registry https://registry.npm.taobao.org \
     && npm config set sass_binary_site https://npm.taobao.org/mirrors/node-sass/ \
-    && npm install -g yarn \
-    && npm install -g gulp \
-    && npm install -g bower \
-    && npm install -g @angular/cli
+    && npm i -g yarn cnpm gulp bower @angular/cli
 
 USER jenkins
