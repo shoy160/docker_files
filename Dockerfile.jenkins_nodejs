@@ -13,15 +13,14 @@ ENV PATH=$PATH:/nodejs/bin
 # dependencies
 RUN npm config set registry https://registry.npm.taobao.org \
     && npm config set sass_binary_site https://npm.taobao.org/mirrors/node-sass/ \
-    && npm install -g yarn \
-    && npm install -g gulp \
-    && npm install -g bower \
-    && npm install -g @angular/cli
+    && npm install -g yarn gulp cnpm @angular/cli
 
 #sudo
 RUN apt-get update \
   && apt-get install -y sudo \
-  && rm -rf /var/lib/apt/lists/*
-RUN echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
+  && rm -rf /var/lib/apt/lists/* \
+  && echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
 
 USER jenkins
+
+# docker build -t shoy160/jenkins:nodejs -f Dockerfile.jenkins_nodejs .

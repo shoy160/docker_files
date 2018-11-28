@@ -10,7 +10,9 @@ EXPOSE 5000
 ENV ASPNETCORE_URLS http://*:5000
 
 # set up the runtime store
-RUN apk add --update curl && \
+RUN apk add --update curl \
+    && echo "\ndotnet --list-runtimes" >> /publish/start.sh \
+    && \
     for version in '2.0.0' '2.0.3' '2.0.5' '2.0.6' '2.0.7' '2.0.8'; do \
         curl -o /tmp/runtimestore.tar.gz https://dist.asp.net/runtimestore/$version/linux-x64/aspnetcore.runtimestore.tar.gz \
         && export DOTNET_HOME=$(dirname $(readlink $(which dotnet))) \
@@ -19,10 +21,7 @@ RUN apk add --update curl && \
     done
 
 #修改时区
-#安装libgdiplus模块
-
-# RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo "Asia/Shanghai" > /etc/timezone && \
-#     echo "\ndeb http://ftp.de.debian.org/debian jessie main" >> /etc/apt/source.list && \
-#     apt-get update && apt-get install -y libgdiplus && ln -s /usr/lib/libgdiplus.so /publish/gdiplus.dll
 
 CMD ["sh", "start.sh"]
+
+# docker build -t shoy160/dotnet:alpine -f Dockerfile.dotnet_alpine .
