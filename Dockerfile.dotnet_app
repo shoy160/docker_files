@@ -6,9 +6,9 @@ RUN dotnet restore && dotnet build
 
 #publish
 FROM build AS publish
-RUN dotnet publish ./Acb.MicroService.Main/Acb.MicroService.Main.csproj -c Release -o ./bin/publish
+RUN dotnet publish ./Acb.MicroService.Main/Acb.MicroService.Main.csproj -c Release -o /app/publish
 
 #构建镜像
-FROM shoy160/dotnet:2.1 AS runtime
-COPY --from=publish /app/Acb.MicroService.Main/bin/publish /publish
+FROM shoy160/dotnet:2.1.6 AS runtime
+COPY --from=publish /app/publish /publish
 ENTRYPOINT ["dotnet", "Acb.MicroService.Main.dll"]
