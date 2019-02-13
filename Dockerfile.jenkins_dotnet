@@ -37,3 +37,8 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 USER jenkins
 
 # docker build -t shoy160/jenkins:dotnet -f Dockerfile.jenkins_dotnet .
+# docker run --name jenkins -p 8602:8080 -p 50000:50000 --privileged=true \
+# -v /home/jenkins/jenkins-data:/var/jenkins_home \
+# -v /var/run/docker.sock:/var/run/docker.sock \
+# -v /usr/bin/docker:/usr/bin/docker \
+# -v /usr/lib64/libltdl.so.7:/usr/lib/x86_64-linux-gnu/libltdl.so.7 -d shoy160/jenkins-dotnet
