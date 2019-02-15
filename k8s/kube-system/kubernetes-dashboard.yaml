@@ -186,6 +186,6 @@ spec:
   ports:
     - port: 443
       targetPort: 8443
-      nodePort: 30090
+      nodePort: 30080
   selector:
     k8s-app: kubernetes-dashboard
