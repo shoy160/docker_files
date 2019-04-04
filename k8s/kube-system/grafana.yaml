@@ -64,10 +64,28 @@ spec:
   # or through a public IP.
   # type: LoadBalancer
   # You could also use NodePort to expose the service at a randomly-generated port
-  type: NodePort
+  #type: NodePort
   ports:
-  - port: 80
+  - port: 3000
     targetPort: 3000
-    nodePort: 30090
+    #nodePort: 30090
   selector:
     k8s-app: grafana
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-monitoring-grafana
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: grafana.icb
+    http:
+      paths:
+      - backend:
+          serviceName: monitoring-grafana
+          servicePort: 3000

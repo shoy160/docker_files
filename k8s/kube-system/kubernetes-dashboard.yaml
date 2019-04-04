@@ -184,8 +184,38 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 443
-      targetPort: 8443
-      nodePort: 30080
+  - port: 443
+    targetPort: 8443
+    nodePort: 30080
   selector:
     k8s-app: kubernetes-dashboard
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: dashboard-ui
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    #traefik.frontend.rule.type: PathPrefixStrip
+    traefik.ingress.kubernetes.io/preserve-host: "true"
+    traefik.ingress.kubernetes.io/pass-tls-cert: "true"
+    ingress.kubernetes.io/ssl-redirect: "true"
+    #traefik.ingress.kubernetes.io/frontend-entry-points: http,https
+    #traefik.ingress.kubernetes.io/redirect-entry-point: https
+    #ingress.kubernetes.io/protocol: https
+spec:
+  tls:
+  - hosts:
+    - k8s.icb
+    secretName: k8s-ingress-secret
+  rules:
+  - host: k8s.icb
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kubernetes-dashboard
+          servicePort: 443

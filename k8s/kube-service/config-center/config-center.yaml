@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-center
+  namespace: kube-service
+spec:
+  type: NodePort
+  ports:
+  - port: 5000
+    targetPort: 5000
+    nodePort: 8889
+  selector:
+    app: config-center
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: config-center
+  namespace: kube-service
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: config-center
+  template:
+    metadata:
+      labels:
+        app: config-center
+    spec:
+      containers:
+      - image: shoy160/config-center:3.1
+        name: config-center
+        ports:
+        - containerPort: 5000
+          name: http
+        volumeMounts:
+        - name: config-center-storge
+          mountPath: /publish/_config
+      volumes:
+      - name: config-center-storge
+        persistentVolumeClaim:
+          claimName: config-center-pvc

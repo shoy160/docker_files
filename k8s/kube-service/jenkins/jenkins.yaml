@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    k8s-app: jenkins
+  name: jenkins-k8s
+  namespace: kube-service
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins-k8s-binding
+  namespace: kube-service
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: jenkins-k8s
+  namespace: kube-service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-ui
+  namespace: kube-service
+spec:
+  ports:
+  - port: 8080
+    name: http
+    targetPort: 8080
+  - port: 50000
+    name: agent
+    targetPort: 50000
+  selector:
+    app: jenkins
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jenkins-ui
+  namespace: kube-service
+spec:
+  rules:
+  - host: jenkins.icb
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: jenkins-ui
+          servicePort: 8080
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: kube-service
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      securityContext:
+        fsGroup: 1000
+      serviceAccountName: jenkins-k8s
+      nodeSelector:
+        kubernetes.io/hostname: node231
+      containers:
+      - image: docker.dev:5000/jenkins:dotnet
+        name: jenkins
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 50000
+          name: agent
+        volumeMounts:
+        - name: jenkins-storge
+          mountPath: /var/jenkins_home
+        - name: docker
+          mountPath: /usr/bin/docker
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+        - name: docker-lib
+          mountPath: /usr/lib/x86_64-linux-gnu/libltdl.so.7
+      volumes:
+      - name: jenkins-storge
+        persistentVolumeClaim:
+          claimName: jenkins-pvc
+      - name: docker
+        hostPath:
+          path: /usr/bin/docker
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: docker-lib
+        hostPath:
+          path: /usr/lib64/libltdl.so.7

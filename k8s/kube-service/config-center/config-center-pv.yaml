@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: config-center-pv
+  namespace: kube-service
+  labels:
+    pv: config-center
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  nfs:
+    path: /data/nfs/config-center
+    server: 192.168.0.231
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: config-center-pvc
+  namespace: kube-service
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: nfs
+  selector:
+    matchLabels:
+      pv: config-center

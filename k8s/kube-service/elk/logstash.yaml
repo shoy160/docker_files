@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+  namespace: kube-service
+spec:
+  type: NodePort
+  ports:
+    - name: logstash
+      port: 8610
+      targetPort: 8610
+      nodePort: 8610
+  selector:
+    app: logstash
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: logstash
+  namespace: kube-service
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+        - image: logstash:alpine
+          name: logstash
+          ports:
+            - containerPort: 8610
+              protocol: TCP
+          volumeMounts:
+            - name: logstash
+              mountPath: /config
+          command: ['logstash']
+          args: ["-f", "/config/logstash.conf"]
+          resources:
+            requests:
+              cpu: 200m
+      volumes:
+        - name: logstash
+          persistentVolumeClaim:
+            claimName: logstash-pvc

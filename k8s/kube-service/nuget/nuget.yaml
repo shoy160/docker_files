@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: repo-nuget
+  namespace: kube-service
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 8877
+  selector:
+    app: repo-nuget
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: repo-nuget
+  namespace: kube-service
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: repo-nuget
+  template:
+    metadata:
+      labels:
+        app: repo-nuget
+    spec:
+      containers:
+      - image: sunside/simple-nuget-server
+        imagePullPolicy: IfNotPresent
+        name: repo-nuget
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: repo-nuget-package-storge
+          mountPath: /var/www/packagefiles
+        - name: repo-nuget-db-storge
+          mountPath: /var/www/db
+      volumes:
+      - name: repo-nuget-package-storge
+        persistentVolumeClaim:
+          claimName: repo-nuget-package-pvc
+      - name: repo-nuget-db-storge
+        persistentVolumeClaim:
+          claimName: repo-nuget-db-pvc

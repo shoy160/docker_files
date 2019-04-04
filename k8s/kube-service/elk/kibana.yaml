@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-ui
+  namespace: kube-service
+spec:
+  ports:
+    - name: kibana
+      port: 5601
+      targetPort: 5601
+  selector:
+    app: kibana
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kibana-ui
+  namespace: kube-service
+spec:
+  rules:
+    - host: elk.icb
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kibana-ui
+              servicePort: 5601
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: kube-service
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+        - image: kibana
+          name: kibana
+          ports:
+            - containerPort: 5601

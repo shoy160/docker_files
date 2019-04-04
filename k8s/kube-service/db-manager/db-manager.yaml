@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-manager
+  namespace: kube-service
+spec:
+  ports:
+  - port: 5000
+    targetPort: 5000
+  selector:
+    app: db-manager
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: db-manager
+  namespace: kube-service
+spec:
+  rules:
+  - host: db.icb
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: db-manager
+          servicePort: 5000
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: db-manager
+  namespace: kube-service
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: db-manager
+  template:
+    metadata:
+      labels:
+        app: db-manager
+    spec:
+      containers:
+      - image: docker.dev:5000/db-manager
+        name: db-manager
+        ports:
+        - containerPort: 5000
+          name: http

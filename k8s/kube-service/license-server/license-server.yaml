@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: license-server
+  namespace: kube-service
+spec:
+  type: NodePort
+  ports:
+  - port: 1017
+    targetPort: 1017
+    nodePort: 1027
+  selector:
+    app: license-server
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: license-server
+  namespace: kube-service
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: license-server
+  template:
+    metadata:
+      labels:
+        app: license-server
+    spec:
+      containers:
+      - image: dominate/idea-license-server
+        name: license-server
+        ports:
+        - containerPort: 1017
+          name: http
