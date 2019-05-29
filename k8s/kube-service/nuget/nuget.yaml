@@ -35,6 +35,9 @@ spec:
         name: repo-nuget
         ports:
         - containerPort: 80
+        env:
+        - name: NUGET_API_KEY
+          value: ZDU1ZTIyZGI3YTgzYWZiNjQ3NTZkZGE3
         volumeMounts:
         - name: repo-nuget-package-storge
           mountPath: /var/www/packagefiles

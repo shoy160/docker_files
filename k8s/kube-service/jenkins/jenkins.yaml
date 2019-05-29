@@ -47,7 +47,7 @@ metadata:
   namespace: kube-service
 spec:
   rules:
-  - host: jenkins.icb
+  - host: jenkins.local
     http:
       paths:
       - path: /

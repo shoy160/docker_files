@@ -18,7 +18,7 @@ metadata:
   namespace: kube-service
 spec:
   rules:
-  - host: db.icb
+  - host: db.local
     http:
       paths:
       - path: /
@@ -44,8 +44,11 @@ spec:
         app: db-manager
     spec:
       containers:
-      - image: docker.dev:5000/db-manager
+      - image: docker.dev:5000/db-manager:1.0.3
         name: db-manager
         ports:
         - containerPort: 5000
           name: http
+        env:
+        - name: ACB_LOGLEVEL
+          value: Info

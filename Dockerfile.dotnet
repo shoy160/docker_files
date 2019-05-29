@@ -15,9 +15,10 @@ WORKDIR /publish
 RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone \
     && echo "\ndeb http://ftp.de.debian.org/debian jessie main" >> /etc/apt/source.list \
-    && apt-get update && apt-get install -y libgdiplus && rm -rf /var/lib/apt/lists/* \
-    && ln -s /usr/lib/libgdiplus.so /publish/gdiplus.dll \
-    && ln -s /lib/x86_64-linux-gnu/libdl-2.24.so /lib/x86_64-linux-gnu/libdl.so \
+    && apt-get update && apt-get install -y --no-install-recommends libgdiplus libc6-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    # && ln -s /usr/lib/libgdiplus.so /publish/gdiplus.dll \
+    # && ln -s /lib/x86_64-linux-gnu/libdl-2.24.so /lib/x86_64-linux-gnu/libdl.so \
     && echo "\ndotnet --list-runtimes" >> /publish/start.sh
 
 ENTRYPOINT ["sh","start.sh"]

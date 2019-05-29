@@ -19,7 +19,7 @@ metadata:
   namespace: kube-service
 spec:
   rules:
-    - host: elk.icb
+    - host: elk.local
       http:
         paths:
           - path: /

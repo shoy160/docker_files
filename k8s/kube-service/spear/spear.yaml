@@ -1,30 +1,30 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: config-center
+  name: spear
   namespace: kube-service
 spec:
   ports:
   - port: 5000
     targetPort: 5000
   selector:
-    app: config-center
+    app: spear
 ---
 
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: config-center-ingress
+  name: spear-ingress
   namespace: kube-service
 spec:
   rules:
-  - host: config-center.local
+  - host: spear.local
     http:
       paths:
       - path: /
         backend:
-          serviceName: config-center
+          serviceName: spear
           servicePort: 5000
 
 ---
@@ -32,29 +32,22 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: config-center
+  name: spear
   namespace: kube-service
 spec:
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: config-center
+      app: spear
   template:
     metadata:
       labels:
-        app: config-center
+        app: spear
     spec:
       containers:
-      - image: shoy160/config-center:3.1
-        name: config-center
+      - image: docker.dev:5000/spear:1.0.1
+        name: spear
         ports:
         - containerPort: 5000
           name: http
-        volumeMounts:
-        - name: config-center-storge
-          mountPath: /publish/_config
-      volumes:
-      - name: config-center-storge
-        persistentVolumeClaim:
-          claimName: config-center-pvc
