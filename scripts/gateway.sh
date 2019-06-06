@@ -1,8 +1,33 @@
 #!/bin/bash
 #$1:name
-if [ -n "$1" ];then
-    name=$1    
-else
+prefix="Acb"
+has_busi=false
+sql_name="MySql"
+proj_name=""
+while getopts ":n:b:d:p" opt
+do
+    case $opt in
+        n)
+            echo "参数n的值$OPTARG"
+            name=$OPTARG
+            ;;
+        b)
+            echo "参数b的值$OPTARG"
+            has_busi=true
+            ;;
+        d)
+            echo "参数d的值$OPTARG"
+            sql_name=$OPTARG
+            ;;
+        p)
+            echo "参数p的值$OPTARG"
+            prefix=$OPTARG
+            ;;
+        ?)
+            ;;
+    esac
+done
+if [ ! -n "$name" ];then
     read -t 30 -p "请输入项目名称:" rname
     if [ -n "$rname" ];then
         name=$rname        
@@ -14,63 +39,86 @@ if [ ! -n "$name" ];then
     exit 1
 fi
 
-slnname="Acb.Gateway.$name"
+get_proj_name(){
+    proj_name="$1/$1.csproj"
+}
 
-# echo $workdir
-# echo $slnname
-mkdir $slnname
-cd $slnname
+if [ hasBusi ];then
+    contract_name="$prefix.$name.Contracts"  
+    busi_name="$prefix.$name.Business"
+fi
+test_name="$prefix.$name.Tests"
+api_name="$prefix.Gateway.$name"
 
-#创建解决方案
-dotnet new sln -n $slnname
+echo $contract_name,$busi_name,$test_name,$api_name,$sql_name
+get_proj_name $contract_name
+echo $proj_name
 
-#创建项目
-#list="Contracts Business Tests Api"
-list="Tests Api"
-for i in $list
-do
+new_sln(){
+    sln_name="$prefix.Gateway.$name"    
+    mkdir $sln_name
+    cd $sln_name
+    #创建解决方案
+    dotnet new sln -n $sln_name
+}
 
-case $i in
-Tests)
-    pname="Acb.$name.$i"    
-    dotnet new mstest -n $pname
+new_contract(){
+    if [ ! -n $contract_name ];then
+        return 0;
+    fi
+    dotnet new classlib -n $contract_name
+    get_proj_name $contract_name
+    dotnet sln add $proj_name
+    dotnet add $proj_name package Acb.Core    
+}
 
-    dotnet sln add "$pname/$pname.csproj"
-    ;;
-Api)
-    pname="Acb.Gateway.$name"    
-    dotnet new webapi -n $pname
+new_busi(){
+    if [ ! -n $busi_name ];then
+        return 0;
+    fi    
+    dotnet new classlib -n $busi_name
+    get_proj_name $busi_name
+    dotnet sln add $proj_name
+    dotnet add $proj_name package Acb.Core
+    dotnet add $proj_name package Acb.Dapper
+    dotnet add $proj_name package "Acb.Dapper.$sql_name"
+}
 
-    dotnet sln add "$pname/$pname.csproj"
-    ;;
-*)
-    pname="Acb.$name.$i"
-    dotnet new classlib -n $pname
+new_test(){
+    dotnet new mstest -n $test_name
+    get_proj_name $test_name
+    dotnet sln add $proj_name
+    dotnet add $proj_name package Acb.Core
+    dotnet add $proj_name package Acb.Framework
+    dotnet add $proj_name package Acb.MicroService.Client
+    if [ hasBusi ];then
+        t_proj_name=$proj_name
+        get_proj_name $contract_name
+        dotnet add $t_proj_name reference $proj_name
+        get_proj_name $busi_name
+        dotnet add $t_proj_name reference $proj_name
+    fi    
+}
 
-    dotnet sln add "$pname/$pname.csproj"
-    ;;
-esac
-done
+new_api(){
+    dotnet new webapi -n $api_name
+    get_proj_name $api_name
+    dotnet sln add $proj_name
+    dotnet add $proj_name package Acb.Core
+    dotnet add $proj_name package Acb.Framework
+    dotnet add $proj_name package Acb.WebApi
+    dotnet add $proj_name package Acb.MicroService.Client
+    if [ hasBusi ];then
+        t_proj_name=$proj_name
+        get_proj_name $contract_name
+        dotnet add $t_proj_name reference $proj_name
+        get_proj_name $busi_name
+        dotnet add $t_proj_name reference $proj_name
+    fi    
+}
 
-#引用
-#projBusiness="Acb.$name.Business/Acb.$name.Business.csproj"
-#projContracts="Acb.$name.Contracts/Acb.$name.Contracts.csproj"
-projTests="Acb.$name.Tests/Acb.$name.Tests.csproj"
-projGateway="Acb.Gateway.$name/Acb.Gateway.$name.csproj"
-
-#项目引用
-#dotnet add $projBusiness reference $projContracts
-#dotnet add $projTests reference $projContracts $projBusiness
-#dotnet add $projGateway reference $projContracts $projBusiness
-
-#包引用
-#dotnet add $projContracts package Acb.Core 
-#dotnet add $projBusiness package Acb.Core
-#dotnet add $projBusiness package Acb.Dapper
-#dotnet add $projBusiness package Acb.Dapper.MySql
-dotnet add $projTests package Acb.Framework 
-dotnet add $projTests package Acb.MicroService.Client
-
-dotnet add $projGateway package Acb.Framework
-dotnet add $projGateway package Acb.WebApi
-dotnet add $projGateway package Acb.MicroService.Client
+new_sln
+new_contract
+new_busi
+new_test
+new_api
