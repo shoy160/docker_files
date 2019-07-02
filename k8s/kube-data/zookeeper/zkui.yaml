@@ -1,0 +1,55 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: zk-ui
+  namespace: kube-data
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: zk-ui
+  template:
+    metadata:
+      labels:
+        app: zk-ui
+    spec:
+      containers:
+      - image: docker.dev:5000/zkui
+        name: zk-ui
+        ports:
+        - containerPort: 9090
+          name: http
+        env:
+        - name: ZK_SERVER
+          value: "zk-cs.kube-data:2181"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zk-ui
+  namespace: kube-data
+spec:
+  ports:
+  - port: 9090
+    targetPort: 9090
+  selector:
+    app: zk-ui
+---
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-zk-ui
+  namespace: kube-data
+spec:
+  rules:
+  - host: zk.local
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: zk-ui
+          servicePort: 9090

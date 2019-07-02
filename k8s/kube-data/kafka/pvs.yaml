@@ -1,0 +1,61 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-kafka01
+  namespace: kube-data
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "nfs-storage"
+  labels:
+    pv: kafka
+spec:
+  capacity:
+    storage: 300Mi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: nfs
+  nfs:
+    path: /data/nfs/kafka/node01
+    server: 192.168.0.231
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-kafka02
+  namespace: kube-data
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "nfs-storage"
+  labels:
+    pv: kafka
+spec:
+  capacity:
+    storage: 300Mi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: nfs
+  nfs:
+    path: /data/nfs/kafka/node02
+    server: 192.168.0.231
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-kafka03
+  namespace: kube-data
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "nfs-storage"
+  labels:
+    pv: kafka
+spec:
+  capacity:
+    storage: 300Mi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: nfs
+  nfs:
+    path: /data/nfs/kafka/node03
+    server: 192.168.0.231

@@ -1,0 +1,59 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kafka-manager
+  namespace: kube-data
+spec:
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: kafka-manager
+  template:
+    metadata:
+      labels:
+        app: kafka-manager
+    spec:
+      containers:
+      - image: kafkamanager/kafka-manager
+        name: kafka-manager
+        ports:
+        - containerPort: 9000
+          name: http
+        env:
+        - name: ZK_HOSTS
+          value: "zk-cs.kube-data:2181"
+        - name: KAFKA_MANAGER_AUTH_ENABLED
+          value: "true"
+        - name: KAFKA_MANAGER_PASSWORD
+          value: "123456"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-manager
+  namespace: kube-data
+spec:
+  ports:
+  - port: 9000
+    targetPort: 9000
+  selector:
+    app: kafka-manager
+---
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-kafka-manager
+  namespace: kube-data
+spec:
+  rules:
+  - host: kafka.local
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kafka-manager
+          servicePort: 9000

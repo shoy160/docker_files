@@ -1,0 +1,61 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-zk01
+  namespace: kube-data
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "nfs-storage"
+  labels:
+    pv: zookeeper
+spec:
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: nfs
+  nfs:
+    path: /data/nfs/zk/node01
+    server: 192.168.0.231
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-zk02
+  namespace: kube-data
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "nfs-storage"
+  labels:
+    pv: zookeeper
+spec:
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: nfs
+  nfs:
+    path: /data/nfs/zk/node02
+    server: 192.168.0.231
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-zk03
+  namespace: kube-data
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "nfs-storage"
+  labels:
+    pv: zookeeper
+spec:
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: nfs
+  nfs:
+    path: /data/nfs/zk/node03
+    server: 192.168.0.231
