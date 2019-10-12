@@ -1,0 +1,36 @@
+# Default values for alibaba-cloud-log.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+ProjectName: "project-k8s-log"
+RegionId: "cn-hangzhou"
+InstallParam: "cn-hangzhou"
+MachineGroupId: "k8s-demo"
+Endpoint: "cn-hangzhou.log.aliyuncs.com"
+AlibabaCloudUserId: "123456789"
+Privileged: false
+# if you are using alicloud kubernetes, set this flag true
+AlibabaCloudK8SCluster: true
+# support env config or not
+DockerEnvConfig: true
+
+LogtailImage:
+  Repository: "registry.cn-hangzhou.aliyuncs.com/log-service/logtail"
+  Tag: "latest"
+ControllerImage:
+  Repository: "registry.cn-hangzhou.aliyuncs.com/log-service/alibabacloud-log-controller"
+  Tag: "latest"
+
+Resources:
+  # default limit for logtail, see https://help.aliyun.com/document_detail/32278.html
+  Logtail:
+    CpuLimit: 1.0
+    MemLimit: 512
+    # SendMax must be string and end with ":"
+    SendMax: "20971520:"
+    SendConcurrency: 20
+  Limits:
+    Memory: 512Mi
+  Requests:
+    Cpu: 10m
+    Memory: 100Mi

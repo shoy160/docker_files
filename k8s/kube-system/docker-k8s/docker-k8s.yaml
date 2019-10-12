@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docker-k8s
+  namespace: kube-system
+  labels:
+    app: docker-k8s
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docker-k8s
+  template:
+    metadata:
+      labels:
+        app: docker-k8s
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: node231
+      containers:
+      - name: docker-k8s
+        image: docker.local:5000/docker-k8s:1.0.6
+        args: ['--namespace=icb','--enable-delete=true','--enable-k8s=true']
+        resources:
+          requests:
+            cpu: 200m
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - mountPath: /publish/version.json
+          name: version-config
+        - mountPath: /docker-registry
+          name: registry-path
+        - mountPath: /usr/bin/kubectl
+          name: kubectl
+          readOnly: true
+        - mountPath: /root/.kube/config
+          name: kubectl-config
+          readOnly: true
+        env:
+        - name: REGISTRY_DATA_DIR
+          value: /docker-registry
+        - name: DOCKER_REGISTRY
+          value: docker.dev:5000
+        - name: REGISTRY_URL
+          value: https://192.168.0.231:5000
+      volumes:
+      - name: version-config
+        hostPath:
+          path: /root/k8s-manager/kube-system/docker-k8s/version.json
+      - name: registry-path
+        hostPath:
+          path: /opt/data/registry/docker/registry/v2
+      - name: kubectl
+        hostPath:
+          path: /usr/bin/kubectl
+      - name: kubectl-config
+        hostPath:
+          path: /root/.kube/config
+    
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: docker-k8s
+  name: docker-k8s
+  namespace: kube-system
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: docker-k8s
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-docker-k8s
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    #traefik.ingress.kubernetes.io/rule-type: PathPrefixStrip
+spec:
+  rules:
+  - host: docker.local
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: docker-k8s
+            servicePort: 8080

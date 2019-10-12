@@ -1,0 +1,9 @@
+FROM python:2-alpine
+COPY . /publish/
+WORKDIR /publish
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk add --no-cache --update tzdata gcc g++ && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo "Asia/Shanghai" > /etc/timezone && apk del tzdata
+RUN pip install -r requirements.txt -i https://pypi.douban.com/simple
+EXPOSE 8080
+ENTRYPOINT [ "python","main.py"]

@@ -1,0 +1,32 @@
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: prometheus
+  name: prometheus
+  namespace: kube-system
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9090
+    protocol: TCP
+    targetPort: 9090
+  selector:
+    app: prometheus
+  
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: prometheus-ui
+  namespace: kube-system
+  selfLink: /apis/extensions/v1beta1/namespaces/default/ingresses/prometheus
+spec:
+  rules:
+  - host: prometheus.icb
+    http:
+      paths:
+      - backend:
+          serviceName: prometheus
+          servicePort: 9090
+        path: /

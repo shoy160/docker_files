@@ -1,0 +1,109 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: alibaba-log-controller
+  namespace: kube-system
+  labels:
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: alibaba-log-controller
+        name: alibaba-log-controller
+        version: v0.1
+    spec:
+      serviceAccountName: alibaba-log-controller
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+      containers:
+      - name: alibaba-log-controller
+        image: {{ .Values.ControllerImage.Repository }}:{{ .Values.ControllerImage.Tag }}
+        resources:
+          limits:
+            memory: 100Mi
+          requests:
+            cpu: 50m
+            memory: 100Mi
+        env:
+          - name: "ALICLOUD_LOG_PROJECT"
+            value: "{{ .Values.ProjectName }}"
+          - name: "ALICLOUD_LOG_ENDPOINT"
+            value: "{{ .Values.Endpoint }}"
+          - name: "ALICLOUD_LOG_MACHINE_GROUP"
+            value: "{{ .Values.MachineGroupId }}"
+          - name: "ALICLOUD_ACS_K8S_FLAG"
+            value: "{{ .Values.AlibabaCloudK8SCluster }}"
+{{- if not .Values.AlibabaCloudK8SCluster  }}
+          # if not alibaba cloud's k8s cluster, you must set access key
+          - name: "ALICLOUD_ACCESS_KEY_ID"
+            value: "{{ .Values.AccessKeyId }}"
+          - name: "ALICLOUD_ACCESS_KEY_SECRET"
+            value: "{{ .Values.AccessKeySecret }}"
+{{- end }}
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: aliyunlogconfigs.log.alibabacloud.com
+spec:
+  group: log.alibabacloud.com
+  version: v1alpha1
+  names:
+    kind: AliyunLogConfig
+    plural: aliyunlogconfigs
+  scope: Namespaced
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: alibaba-log-controller
+subjects:
+- kind: ServiceAccount
+  name: alibaba-log-controller
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: alibaba-log-controller
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: alibaba-log-controller
+  labels:
+    k8s-app: alibaba-log-controller
+rules:
+- apiGroups: ["log.alibabacloud.com"] # "" indicates the core API group
+  resources:
+  - aliyunlogconfigs
+  verbs:
+  - update
+  - get
+  - watch
+  - list
+- apiGroups: [""] # "" indicates the core API group
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - update
+  - get
+- apiGroups: [""] # "" indicates the core API group
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+  - update
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alibaba-log-controller
+  namespace: kube-system
+  labels:
+    k8s-app: alibaba-log-controller

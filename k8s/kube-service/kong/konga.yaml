@@ -1,0 +1,74 @@
+# 初始化数据库
+# docker run --rm pantsel/konga -c prepare -a postgres -u "postgresql://postgres@192.168.0.251:15432/kong"
+apiVersion: v1
+kind: Service
+metadata:
+  name: konga-service
+  namespace: kong
+spec:
+  ports:
+  - port: 1337
+    targetPort: 1337
+  selector:
+    app: konga
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: konga
+  namespace: kong
+spec:
+  rules:
+  - host: konga.local
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: konga-service
+          servicePort: 1337
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: konga
+  namespace: kong
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: konga
+  template:
+    metadata:
+      labels:
+        app: konga
+    spec:
+      containers:
+      - image: pantsel/konga
+        name: konga
+        ports:
+        - containerPort: 1337
+          name: http
+        env:
+        - name: NODE_ENV
+          value: production
+        - name: TOKEN_SECRET
+          value: shay123
+        - name: DB_ADAPTER
+          value: postgres
+        - name: DB_HOST
+          value: "192.168.0.251"
+        - name: DB_PORT
+          value: "15432"
+        - name: DB_DATABASE
+          value: kong
+        - name: DB_USER
+          value: postgres
+        - name: DB_PASSWORD
+          value: ""
+        - name: DB_PG_SCHEMA
+          value: "public"
+        # - name: DB_URI
+        #   value: "postgresql://postgres@192.168.0.251:15432/kong"

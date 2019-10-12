@@ -1,5 +1,7 @@
-﻿FROM microsoft/dotnet:2.1.6-aspnetcore-runtime
+﻿FROM mcr.microsoft.com/dotnet/core/aspnet:3.0
  
+COPY ./sources.list /etc/apt/
+
 #设置Docker容器对外暴露5000端口
 EXPOSE 5000
 
@@ -14,13 +16,12 @@ WORKDIR /publish
 
 RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone \
-    && echo "\ndeb http://ftp.de.debian.org/debian jessie main" >> /etc/apt/source.list \
     && apt-get update && apt-get install -y --no-install-recommends libgdiplus libc6-dev \
     && rm -rf /var/lib/apt/lists/* \
     # && ln -s /usr/lib/libgdiplus.so /publish/gdiplus.dll \
-    # && ln -s /lib/x86_64-linux-gnu/libdl-2.24.so /lib/x86_64-linux-gnu/libdl.so \
-    && echo "\ndotnet --list-runtimes" >> /publish/start.sh
+    && ln -s /lib/x86_64-linux-gnu/libdl-2.24.so /lib/x86_64-linux-gnu/libdl.so \
+    && echo "dotnet --list-runtimes" > /publish/start.sh
 
 ENTRYPOINT ["sh","start.sh"]
 
-# docker build -t shoy160/dotnet:2.1.6 -f Dockerfile.dotnet .
+# docker build -t shoy160/dotnet:3.0 -f Dockerfile.dotnet_3.0 .

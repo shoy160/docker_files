@@ -1,0 +1,55 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: default
+  labels:
+    k8s-app: node-exporter
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: node-exporter
+    spec:
+      containers:
+      - image: prom/node-exporter
+        name: node-exporter
+        ports:
+        - containerPort: 9100
+          protocol: TCP
+          name: http
+          hostPort: 9101
+        volumeMounts:
+        - mountPath: /host/proc
+          name: proc
+        - mountPath: /host/sys
+          name: sys
+        args:
+        - --path.procfs=/host/proc
+        - --path.sysfs=/host/sys
+        - --collector.filesystem.ignored-mount-points
+        - "^/(dev|proc|sys|host|etc|rootfs|docker)($|/)"
+      volumes:
+      - hostPath:
+          path: /proc
+        name: proc
+      - hostPath:
+          path: /sys
+        name: sys
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: node-exporter
+  name: node-exporter
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    k8s-app: node-exporter
+  ports:
+  - name: http
+    port: 9100
+    nodePort: 31672
+    protocol: TCP

@@ -1,0 +1,102 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: logtail-ds
+  namespace: kube-system
+  labels:
+    k8s-app: logtail-ds
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        k8s-app: logtail-ds
+        kubernetes.io/cluster-service: "true"
+        version: v1.0
+      # This annotation ensures that logtail does not get evicted if the node
+      # supports critical pod annotation based priority scheme.
+      # Note that this does not guarantee admission on the nodes (#40573).
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      containers:
+      - name: logtail
+        image: {{ .Values.LogtailImage.Repository }}:{{ .Values.LogtailImage.Tag }}
+        resources:
+          limits:
+            memory: {{ .Values.Resources.Limits.Memory }}
+          requests:
+            cpu: {{ .Values.Resources.Requests.Cpu }}
+            memory: {{ .Values.Resources.Requests.Memory }}
+        livenessProbe:
+          exec:
+            command:
+            - /etc/init.d/ilogtaild
+            - status
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        securityContext:
+          privileged: {{ .Values.Privileged }}
+        env:
+          - name: "ALIYUN_LOGTAIL_CONFIG"
+            value: "/etc/ilogtail/conf/{{ .Values.InstallParam }}/ilogtail_config.json"
+          - name: "ALIYUN_LOGTAIL_USER_ID"
+            ## work aroud https://github.com/kubernetes/helm/issues/1707
+            value: "{{ .Values.AlibabaCloudUserId | replace ":" "" }}"
+          - name: "ALIYUN_LOGTAIL_USER_DEFINED_ID"
+            value: "{{ .Values.MachineGroupId }}"
+{{- if .Values.DockerEnvConfig  }}
+          - name: "ALICLOUD_LOG_DOCKER_ENV_CONFIG"
+            value: "true"
+          - name: "ALICLOUD_LOG_ECS_FLAG"
+            value: "{{ .Values.AlibabaCloudK8SCluster }}"
+{{- if not .Values.AlibabaCloudK8SCluster  }}
+          - name: "ALICLOUD_LOG_ACCESS_KEY_ID"
+            value: "{{ .Values.AccessKeyId }}"
+          - name: "ALICLOUD_LOG_ACCESS_KEY_SECRET"
+            value: "{{ .Values.AccessKeySecret }}"
+{{- end }}
+          - name: "ALICLOUD_LOG_DEFAULT_PROJECT"
+            value: "{{ .Values.ProjectName }}"
+          - name: "ALICLOUD_LOG_ENDPOINT"
+            value: "{{ .Values.Endpoint }}"
+          - name: "ALICLOUD_LOG_DEFAULT_MACHINE_GROUP"
+            value: "{{ .Values.MachineGroupId }}"
+{{- end }}
+          # env tags for k8s node name and node ip
+          - name: "ALIYUN_LOG_ENV_TAGS"
+            value: "_node_name_|_node_ip_"
+          - name: "_node_name_"
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: "_node_ip_"
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          # resource limit for logtail self process
+          - name: "cpu_usage_limit"
+            value: "{{ .Values.Resources.Logtail.CpuLimit }}"
+          - name: "mem_usage_limit"
+            value: "{{ .Values.Resources.Logtail.MemLimit }}"
+          - name: "max_bytes_per_sec"
+            value: "{{ .Values.Resources.Logtail.SendMax  | replace ":" ""  }}"
+          - name: "send_request_concurrency"
+            value: "{{ .Values.Resources.Logtail.SendConcurrency }}"
+        volumeMounts:
+        - name: sock
+          mountPath: /var/run/docker.sock
+        - name: root
+          mountPath: /logtail_host
+          readOnly: true
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - operator: "Exists"
+      volumes:
+      - name: sock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: root
+        hostPath:
+          path: /
