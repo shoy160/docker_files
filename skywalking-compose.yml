@@ -1,0 +1,44 @@
+version: '3.3'
+services:
+  elasticsearch:
+    image: elasticsearch:6.8.0
+    container_name: skywalking-es
+    restart: always
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      discovery.type: single-node
+      TZ: Asia/Shanghai
+  oap:
+    image: apache/skywalking-oap-server:6.1.0
+    container_name: skywalking-oap
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    restart: always
+    #前边为外网端口号,后边为容器应用端口号
+    ports:
+      - 11800:11800
+      - 12800:12800
+    environment:
+      # 设置时区
+      TZ: Asia/Shanghai
+   # volumes:
+   #   - /home/skywalking/apache-skywalking-apm-bin/config/application.yml
+     # - ./config:/skywalking/config:ro
+  ui:
+    image: apache/skywalking-ui:6.1.0
+    container_name: skywalking-ui
+    depends_on:
+      - oap
+    links:
+      - oap
+    restart: always
+    ports:
+      - 18080:8080
+    #设置环境,配置覆盖yml的配置
+    environment:
+      collector.ribbon.listOfServers: oap:12800
+      security.user.admin.password: adminsou888!
