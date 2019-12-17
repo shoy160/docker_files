@@ -1,0 +1,27 @@
+﻿FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+ 
+COPY ../sources.list /etc/apt/
+
+#设置Docker容器对外暴露5000端口
+EXPOSE 5000
+
+#设置环境变量
+ENV ASPNETCORE_URLS http://*:5000
+
+#设置工作目录为 `/publish` 文件夹，即容器启动默认的文件夹
+WORKDIR /publish
+
+#修改时区
+#安装libgdiplus模块
+
+RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone \
+    && apt-get update && apt-get install -y --no-install-recommends libgdiplus libc6-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    # && ln -s /usr/lib/libgdiplus.so /publish/gdiplus.dll \
+    && ln -s /lib/x86_64-linux-gnu/libdl-2.24.so /lib/x86_64-linux-gnu/libdl.so \
+    && echo "dotnet --list-runtimes" > /publish/start.sh
+
+ENTRYPOINT ["sh","start.sh"]
+
+# docker build -t shoy160/dotnet:3.1 -f Dockerfile.dotnet_3.1 .
