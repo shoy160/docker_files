@@ -1,5 +1,7 @@
 ﻿FROM microsoft/dotnet:2.1.6-aspnetcore-runtime
  
+COPY ../sources_8.list /etc/apt/sources.list
+ 
 #设置Docker容器对外暴露5000端口
 EXPOSE 5000
 
