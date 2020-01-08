@@ -16,11 +16,17 @@ WORKDIR /publish
 
 RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone \
-    && apt-get update && apt-get install -y --no-install-recommends libgdiplus libc6-dev \
+    && apt-get update && apt-get install -y --allow-unauthenticated --no-install-recommends libc6-dev libgdiplus libx11-dev xvfb \
     && rm -rf /var/lib/apt/lists/* \
     # && ln -s /usr/lib/libgdiplus.so /publish/gdiplus.dll \
     && ln -s /lib/x86_64-linux-gnu/libdl-2.24.so /lib/x86_64-linux-gnu/libdl.so \
     && echo "dotnet --list-runtimes" > /publish/start.sh
+
+# npoi fix x-server
+ENV DISPLAY :10
+RUN echo '#!/bin/sh\n/usr/bin/Xvfb :10 -ac>>/tmp/Xvfb.out 2>&1 &' > /etc/init.d/xvfb \
+	&& chmod +x /etc/init.d/xvfb \
+	&& update-rc.d xvfb defaults
 
 ENTRYPOINT ["sh","start.sh"]
 
