@@ -67,7 +67,7 @@ spec:
       serviceAccountName: skywalking-oap
       containers:
         - name: oap
-          image: apache/skywalking-oap-server:6.6.0-es6
+          image: apache/skywalking-oap-server:7.0.0-es6
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 11800
@@ -80,7 +80,7 @@ spec:
             - name: SW_STORAGE
               value: elasticsearch
             - name: SW_STORAGE_ES_CLUSTER_NODES
-              value: elasticsearch.kube-service:9200
+              value: elasticsearch:9200
             # - name: SW_STORAGE_ES_CLUSTER_NODES
             #   value: "192.168.78.136:9200"
             # - name: SW_CLUSTER

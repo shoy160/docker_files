@@ -23,10 +23,10 @@ RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "dotnet --list-runtimes" > /publish/start.sh
 
 # npoi fix x-server
-ENV DISPLAY :10
-RUN echo '#!/bin/sh\n/usr/bin/Xvfb :10 -ac>>/tmp/Xvfb.out 2>&1 &' > /etc/init.d/xvfb \
-	&& chmod +x /etc/init.d/xvfb \
-	&& update-rc.d xvfb defaults
+# ENV DISPLAY :10
+# RUN echo '#!/bin/sh\n/usr/bin/Xvfb :10 -ac>>/tmp/Xvfb.out 2>&1 &' > /etc/init.d/xvfb \
+# 	&& chmod +x /etc/init.d/xvfb \    
+# 	&& echo '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d && update-rc.d xvfb defaults
 
 ENTRYPOINT ["sh","start.sh"]
 

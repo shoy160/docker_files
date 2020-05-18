@@ -1,0 +1,26 @@
+FROM node:8-alpine
+
+WORKDIR /app
+
+EXPOSE 9527
+
+RUN echo "nameserver 114.114.114.114" > /etc/resolv.conf
+
+#修改时区
+ENV TZ=Asia/Shanghai
+
+RUN apk add -U tzdata && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
+
+#国内镜像
+RUN npm config set registry http://registry.npm.taobao.org/ && \
+    npm config set sass_binary_site https://npm.taobao.org/mirrors/node-sass/
+
+RUN npm install pm2 -g
+
+#RUN npm install && npm run build
+
+CMD [ "pm2", "start", "pm-config.js","--no-daemon"]
+
+# docker build -t shoy160/nodejs:8-pm2 -f Dockerfile.nodejs-pm2 .
