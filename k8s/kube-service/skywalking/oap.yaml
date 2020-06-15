@@ -80,13 +80,13 @@ spec:
             - name: SW_STORAGE
               value: elasticsearch
             - name: SW_STORAGE_ES_CLUSTER_NODES
-              value: elasticsearch:9200
+              value: elasticsearch.skywalking:9200
             # - name: SW_STORAGE_ES_CLUSTER_NODES
             #   value: "192.168.78.136:9200"
-            # - name: SW_CLUSTER
-            #   value: kubernetes
-            # - name: SW_CLUSTER_K8S_NAMESPACE
-            #   value: skywalking
+            - name: SW_CLUSTER
+              value: kubernetes
+            - name: SW_CLUSTER_K8S_NAMESPACE
+              value: skywalking
             # - name: SW_SERVICE_MESH_OFFSET_MAX_FILE_SIZE
             #   value: "200"
             # - name: SW_RECEIVER_BUFFER_DATA_MAX_FILE_SIZE

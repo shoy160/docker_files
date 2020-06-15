@@ -12,20 +12,20 @@ spec:
   selector:
     app: ui
 ---
-apiVersion: extensions/v1beta1
-kind: Ingress
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
 metadata:
   name: skywalking-ingress
   namespace: skywalking
 spec:
-  rules:
-    - host: skywalking.local
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: ui
-              servicePort: 8080
+  entryPoints:
+    - web  
+  routes:
+    - match: Host(`skywalking.local`)
+      kind: Rule
+      services:
+        - name: ui
+          port: 8080
 
 ---
 apiVersion: apps/v1

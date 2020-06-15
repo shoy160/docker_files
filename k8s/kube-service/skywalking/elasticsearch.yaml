@@ -1,0 +1,36 @@
+# elasticsearch
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: skywalking
+spec:
+  ports:
+    - name: elasticsearch
+      port: 9200
+      targetPort: 9200
+  selector:
+    app: elasticsearch
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: skywalking
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+        - image: elasticsearch:6.8.6
+          name: elasticsearch
+          ports:
+            - containerPort: 9200

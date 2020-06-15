@@ -1,0 +1,32 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard
+  namespace: kube-system
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`traefik.shay.com`)
+      kind: Rule
+      services:
+        - name: traefik
+          port: 8080
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: k8s-dashboard
+  namespace: kubernetes-dashboard
+spec:
+  entryPoints:
+    - websecure
+  tls:
+    secretName: kubernetes-dashboard-certs
+  routes:
+    - match: Host(`k8s.shay.com`)
+      kind: Rule
+      services:
+        - name: kubernetes-dashboard
+          port: 443

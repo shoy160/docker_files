@@ -1,0 +1,99 @@
+# 灰度发布
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appv1
+spec:
+  selector:
+    matchLabels:
+      app: appv1
+  template:
+    metadata:
+      labels:
+        use: test
+        app: appv1
+    spec:
+      containers:
+        - name: whoami
+          image: containous/whoami
+          ports:
+            - containerPort: 80
+              name: portv1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appv1
+spec:
+  selector:
+    app: appv1
+  ports:
+    - name: http
+      port: 80
+      targetPort: portv1
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appv2
+spec:
+  selector:
+    matchLabels:
+      app: appv2
+  template:
+    metadata:
+      labels:
+        use: test
+        app: appv2
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+              name: portv2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appv2
+spec:
+  selector:
+    app: appv2
+  ports:
+    - name: http
+      port: 80
+      targetPort: portv2
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: TraefikService
+metadata:
+  name: app-wrr
+spec:
+  weighted:
+    services:
+      - name: appv1
+        weight: 3 # 定义权重
+        port: 80
+        kind: Service # 可选，默认就是 Service
+      - name: appv2
+        weight: 1
+        port: 80
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: wrringressroute
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`gray.shay.com`)
+    kind: Rule
+    services:
+    - name: app-wrr
+      kind: TraefikService
