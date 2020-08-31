@@ -10,7 +10,8 @@ EXPOSE 5000
 ENV ASPNETCORE_URLS http://*:5000
 
 # set up the runtime store
-RUN apk add --update curl \
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk add --update curl \
     && echo "\ndotnet --list-runtimes" >> /publish/start.sh \
     && \
     for version in '2.0.0' '2.0.3' '2.0.5' '2.0.6' '2.0.7' '2.0.8'; do \
