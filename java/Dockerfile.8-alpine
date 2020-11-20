@@ -10,13 +10,10 @@ EXPOSE 8080
 
 ENV YZ_MODE "test"
 ENV JAVA_OPTS ""
-ENV DEF_JAVA_OPTS "-Djava.security.egd=file:/dev/./urandom -Duser.timezone=Asia/Shanghai -Dfile.encoding=utf-8"
-ENV DEF_JAVA_PARAMS "--spring.profiles.active=${YZ_MODE} --server.port=8080"
 ENV JAVA_PARAMS ""
+ENV DEF_JAVA_OPTS "-Djava.security.egd=file:/dev/./urandom -Duser.timezone=Asia/Shanghai -Dfile.encoding=utf-8"
+#ENV DEF_JAVA_PARAMS "--spring.profiles.active=${YZ_MODE} --server.port=8080"
 
 ADD *-web/target/*.jar ./app.jar
 
-ENTRYPOINT [ "sh", "-c", "java ${JAVA_OPTS} ${DEF_JAVA_OPTS} -jar app.jar ${JAVA_PARAMS} ${DEF_JAVA_PARAMS}" ]
-
-#ENTRYPOINT [ "java", "-Djava.security.egd=file:/dev/./urandom -Duser.timezone=Asia/Shanghai -Dfile.encoding=utf-8", "-jar", "app.jar" ]
-#CMD [ "--spring.profiles.active=${YZ_MODE}", "--server.port=8080" ]
+ENTRYPOINT [ "sh", "-c", "java ${JAVA_OPTS} ${DEF_JAVA_OPTS} -jar app.jar ${JAVA_PARAMS} --spring.profiles.active=${YZ_MODE} --server.port=8080" ]

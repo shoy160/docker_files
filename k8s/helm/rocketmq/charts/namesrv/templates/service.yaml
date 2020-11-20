@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "namesrv.fullname" . }}
+  labels:
+    {{- include "namesrv.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 9876
+      protocol: TCP
+      name: rocketmq
+  selector:
+    {{- include "namesrv.selectorLabels" . | nindent 4 }}

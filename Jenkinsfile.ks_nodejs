@@ -30,6 +30,7 @@ pipeline {
         stage('build & push') {
             steps {
                 container('nodejs') {
+                    sh 'npm config set registry https://registry.npm.taobao.org/'
                     sh 'npm install && npm run build'
                     sh 'docker build -f Dockerfile -t $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER .'
                     withCredentials([usernamePassword(passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME', credentialsId: "$DOCKER_CREDENTIAL_ID",)]) {

@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hainan-oa-biz-v1
+  namespace: hainan-test
+  labels:
+    app: hainan-oa-biz
+    app.kubernetes.io/name: hainan-biz
+    app.kubernetes.io/version: v1
+    version: v1
+  annotations:
+    kubesphere.io/description: '政务OA后端服务接口'
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: hainan-oa-biz
+      app.kubernetes.io/name: hainan-biz
+      app.kubernetes.io/version: v1
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: hainan-oa-biz
+        app.kubernetes.io/name: hainan-biz
+        app.kubernetes.io/version: v1
+        version: v1
+      annotations:
+        kubesphere.io/containerSecrets: '{"hainan-oa-biz":"harbor"}'
+    spec:
+      containers:
+      - image: $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER
+        imagePullPolicy: Always
+        name: hainan-oa-api
+        ports:
+        - containerPort: 8080
+          name: tcp-8080
+          protocol: TCP
+        env:
+        - name: JAVA_OPTS
+          valueFrom:
+            configMapKeyRef:
+              name: jvm
+              key: JAVA_OPTS
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 10m
+            memory: 10Mi
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 10
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      imagePullSecrets:
+        - name: harbor
