@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "rocketmq.fullname" . }}
+  labels:
+    {{- include "rocketmq.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "rocketmq.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "rocketmq.fullname" . }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        app.kubernetes.io/name: {{ include "rocketmq.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size | quote }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "rocketmq.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          volumeMounts:
+            - name: data
+              mountPath: /home/rocketmq/store
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: NAMESRV_ADDR
+              value: {{ .Release.Name }}-namesrv:9876
+            - name: BROKER_ID
+              value: '0'
+            - name: BROKER_ROLE
+              value: ASYNC_MASTER
+            - name: STATEFULSET_NAME
+              value: {{ include "rocketmq.fullname" . }}
+            - name: SEND_MESSAGE_THREAD_POOL_NUMS
+              value: "128"
+            {{- if .Values.brokerIp }}
+            - name: BROKER_IP1
+              value: {{ .Values.brokerIp }}
+            {{- end }}
+            - name: POD_NAME
+              value: '1'
+          ports:
+            - name: tcp-10909
+              containerPort: 10909
+              protocol: TCP
+            - name: tcp-10911
+              containerPort: 10911
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: 10909
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 10909
+            initialDelaySeconds: 120
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}          
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

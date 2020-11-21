@@ -1,0 +1,56 @@
+---
+# Source: rocketmq/charts/console-ng/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: RELEASE-NAME-console-ng
+  labels:
+    helm.sh/chart: console-ng-0.1.0
+    app.kubernetes.io/name: console-ng
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "4.7.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: console-ng
+      app.kubernetes.io/instance: RELEASE-NAME
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: console-ng
+        app.kubernetes.io/instance: RELEASE-NAME
+    spec:
+      securityContext:
+        {}
+      containers:
+        - name: console-ng
+          securityContext:
+            {}
+          image: "hub.app-chengdu1.yunzhicloud.com/library/rocketmq-console-ng:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: JAVA_OPTS
+              value: "-Drocketmq.namesrv.addr=RELEASE-NAME-namesrv:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false"
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2048Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi

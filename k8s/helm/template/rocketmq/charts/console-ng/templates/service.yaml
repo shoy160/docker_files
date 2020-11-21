@@ -1,0 +1,22 @@
+---
+# Source: rocketmq/charts/console-ng/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: RELEASE-NAME-console-ng
+  labels:
+    helm.sh/chart: console-ng-0.1.0
+    app.kubernetes.io/name: console-ng
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "4.7.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: console-ng
+    app.kubernetes.io/instance: RELEASE-NAME

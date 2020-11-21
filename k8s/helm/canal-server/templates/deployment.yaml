@@ -1,14 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "namesrv.fullname" . }}
+  name: {{ include "canal-server.fullname" . }}
   labels:
-    {{- include "namesrv.labels" . | nindent 4 }}
+    {{- include "canal-server.labels" . | nindent 4 }}
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
-      {{- include "namesrv.selectorLabels" . | nindent 6 }}
+      {{- include "canal-server.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -16,12 +18,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "namesrv.selectorLabels" . | nindent 8 }}
+        {{- include "canal-server.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "canal-server.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -31,14 +34,15 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: rocketmq
-              containerPort: 9876
+            - name: socket
+              containerPort: 11111
               protocol: TCP
-          readinessProbe:
-            tcpSocket:
-              port: 9876
-            initialDelaySeconds: 10
-            periodSeconds: 5
+            - name: admin
+              containerPort: 11110
+              protocol: TCP
+          {{- if .Values.canalServer.enabled }}
+          env: {{ toYaml .Values.canalServer.env | nindent 10 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

@@ -1,6 +1,6 @@
 apiVersion: v2
-name: namesrv
-description: Apache RocketMQ NameSrv
+name: console-ng
+description: UI For RocketMQ
 type: application
 version: 0.1.1
 appVersion: 4.7.1

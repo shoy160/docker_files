@@ -17,6 +17,12 @@
           "sliderUnit": "Gi"
         }
       }
+    },
+    "brokerIp": {
+      "type": "string",
+      "title": "Broker IP",
+      "form": true,
+      "regex": "^[1-9][0-9]{1-2}\\.[1-9][0-9]{0,2}\\.[1-9][0-9]{0,2}$"
     }
   },
   "required": ["persistence"]

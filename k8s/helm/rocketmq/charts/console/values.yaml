@@ -1,21 +1,18 @@
-# Default values for rocketmq.
+# Default values for console.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
 image:
-  repository: hub.app-chengdu1.yunzhicloud.com/library/rocketmq-broker
+  repository: hub.app-chengdu1.yunzhicloud.com/library/rocketmq-console-ng
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "4.7.1-alpine"
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-
-persistence:
-  size: 2Gi
 
 podAnnotations: {}
 
@@ -32,10 +29,7 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port1: 10909
-  port2: 10911
-
-brokerIp: ""
+  port: 8080
 
 ingress:
   enabled: false
@@ -52,8 +46,8 @@ ingress:
 
 resources: 
   limits:
-    cpu: 2000m
-    memory: 2Gi
+    cpu: 1000m
+    memory: 2048Mi
   requests:
     cpu: 100m
     memory: 128Mi

@@ -1,0 +1,82 @@
+---
+# Source: rocketmq/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: RELEASE-NAME-rocketmq
+  labels:
+    helm.sh/chart: rocketmq-0.1.0
+    app.kubernetes.io/name: rocketmq
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "4.7.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rocketmq
+      app.kubernetes.io/instance: RELEASE-NAME
+  serviceName: RELEASE-NAME-rocketmq
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        app.kubernetes.io/name: rocketmq
+        app.kubernetes.io/instance: RELEASE-NAME
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: "2Gi"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rocketmq
+        app.kubernetes.io/instance: RELEASE-NAME
+    spec:
+      containers:
+        - name: rocketmq
+          volumeMounts:
+            - name: data
+              mountPath: /home/rocketmq/store
+          securityContext:
+            {}
+          image: "hub.app-chengdu1.yunzhicloud.com/library/rocketmq-broker:4.7.1-alpine"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NAMESRV_ADDR
+              value: RELEASE-NAME-namesrv:9876
+            - name: BROKER_ID
+              value: '0'
+            - name: BROKER_ROLE
+              value: ASYNC_MASTER
+            - name: STATEFULSET_NAME
+              value: RELEASE-NAME-rocketmq
+            - name: SEND_MESSAGE_THREAD_POOL_NUMS
+              value: "128"
+            - name: POD_NAME
+              value: '1'
+          ports:
+            - name: tcp-10909
+              containerPort: 10909
+              protocol: TCP
+            - name: tcp-10911
+              containerPort: 10911
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: 10909
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 10909
+            initialDelaySeconds: 120
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+            requests:
+              cpu: 100m
+              memory: 128Mi

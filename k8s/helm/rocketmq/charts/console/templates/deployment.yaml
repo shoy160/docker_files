@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "namesrv.fullname" . }}
+  name: {{ include "console.fullname" . }}
   labels:
-    {{- include "namesrv.labels" . | nindent 4 }}
+    {{- include "console.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "namesrv.selectorLabels" . | nindent 6 }}
+      {{- include "console.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -16,7 +16,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "namesrv.selectorLabels" . | nindent 8 }}
+        {{- include "console.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -31,14 +31,22 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: rocketmq
-              containerPort: 9876
+            - name: http
+              containerPort: 8080
               protocol: TCP
+          env:
+            - name: JAVA_OPTS
+              value: "-Drocketmq.namesrv.addr={{ .Release.Name }}-namesrv:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false"
           readinessProbe:
             tcpSocket:
-              port: 9876
+              port: 8080
             initialDelaySeconds: 10
             periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 10
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

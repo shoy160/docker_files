@@ -1,0 +1,26 @@
+---
+# Source: rocketmq/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: RELEASE-NAME-rocketmq
+  labels:
+    helm.sh/chart: rocketmq-0.1.0
+    app.kubernetes.io/name: rocketmq
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "4.7.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 10909
+      targetPort: 10909
+      protocol: TCP
+      name: tcp-10909
+    - port: 10911
+      targetPort: 10911
+      protocol: TCP
+      name: tcp-10911
+  selector:
+    app.kubernetes.io/name: rocketmq
+    app.kubernetes.io/instance: RELEASE-NAME
