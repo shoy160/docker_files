@@ -1,0 +1,99 @@
+---
+# Source: zookeeper/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: RELEASE-NAME-zookeeper
+  labels:
+    helm.sh/chart: zookeeper-1.0.0
+    app.kubernetes.io/name: zookeeper
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "3.6.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: zookeeper
+      app.kubernetes.io/instance: RELEASE-NAME
+  serviceName: RELEASE-NAME-zookeeper
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        app.kubernetes.io/name: zookeeper
+        app.kubernetes.io/instance: RELEASE-NAME
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: "2Gi"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: zookeeper
+        app.kubernetes.io/instance: RELEASE-NAME
+    spec:
+      securityContext:
+        {}
+      containers:
+        - name: zookeeper
+          volumeMounts:
+            - name: data
+              mountPath: /home/zookeeper
+          securityContext:
+            {}
+          image: "hub.app-chengdu1.yunzhicloud.com/library/zookeeper:latest"
+          imagePullPolicy: IfNotPresent
+          command:
+            - bash
+            - -ec
+            - |
+                # Execute entrypoint as usual after obtaining ZOO_MY_ID based on POD hostname
+                HOSTNAME=`hostname -s`
+                mkdir -p /home/zookeeper/store /home/zookeeper/logs
+                if [[ $HOSTNAME =~ (.*)-([0-9]+)$ ]]; then
+                  ORD=${BASH_REMATCH[2]}
+                  export ZOO_MY_ID=$((ORD+1))
+                else
+                  echo "Failed to get index from hostname $HOST"
+                  exit 1
+                fi
+                exec /docker-entrypoint.sh zkServer.sh start-foreground
+          ports:
+            - name: admin
+              containerPort: 8080
+              protocol: TCP
+            - name: client
+              containerPort: 2181
+              protocol: TCP
+            - name: follower
+              containerPort: 2888
+              protocol: TCP
+            - name: election
+              containerPort: 3888
+              protocol: TCP
+          env:
+            - name: ZOO_SERVERS
+              value: server.1=RELEASE-NAME-zookeeper-0.RELEASE-NAME-zookeeper-headless.default.svc.cluster.local:2888:3888;2181 server.2=RELEASE-NAME-zookeeper-1.RELEASE-NAME-zookeeper-headless.default.svc.cluster.local:2888:3888;2181
+            - name: ZOO_DATA_DIR
+              value: "/home/zookeeper/store"
+            - name: ZOO_DATA_LOG_DIR
+              value: "/home/zookeeper/logs"
+          readinessProbe:
+            tcpSocket:
+              port: 2181
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 2181
+            initialDelaySeconds: 120
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 128Mi

@@ -1,0 +1,17 @@
+---
+# Source: matomo/templates/persistentvolumeclaim.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: RELEASE-NAME-matomo
+  labels:
+    app.kubernetes.io/name: matomo
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: matomo-1.0.1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

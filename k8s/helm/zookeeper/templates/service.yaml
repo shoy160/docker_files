@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "zookeeper.fullname" . }}
+  labels:
+    {{- include "zookeeper.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 2181
+      protocol: TCP
+      name: client
+    - port: {{ .Values.service.followerPort }}
+      targetPort: 2888
+      protocol: TCP
+      name: follower
+    - port: {{ .Values.service.electionPort }}
+      targetPort: 3888
+      protocol: TCP
+      name: election
+    - port: {{ .Values.service.adminPort }}
+      targetPort: 8080
+      protocol: TCP
+      name: admin
+  selector:
+    {{- include "zookeeper.selectorLabels" . | nindent 4 }}

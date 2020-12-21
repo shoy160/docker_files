@@ -1,0 +1,14 @@
+---
+# Source: matomo/charts/mysql/templates/tests/test-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: RELEASE-NAME-mysql-test
+  namespace: default
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: mysql-0.1.0
+data:
+  run.sh: |-

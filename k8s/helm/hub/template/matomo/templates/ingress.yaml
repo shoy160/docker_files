@@ -1,0 +1,20 @@
+---
+# Source: matomo/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: RELEASE-NAME-matomo
+  labels:
+    app.kubernetes.io/name: matomo
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: matomo-1.0.1
+spec:
+  rules:
+    - host: matomo.local
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: RELEASE-NAME-matomo
+              servicePort: http

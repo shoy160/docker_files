@@ -1,0 +1,6 @@
+dependencies:
+- name: mysql
+  repository: https://storage.googleapis.com/t3n-helm-charts/
+  version: 0.1.0
+digest: sha256:ce68680c8997503a3faf35a5993b80891bf7a4603c354a09147796f2deccaf4f
+generated: "2020-11-30T12:16:15.724760885Z"

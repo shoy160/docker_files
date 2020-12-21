@@ -1,0 +1,22 @@
+---
+# Source: matomo/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: RELEASE-NAME-matomo
+  labels:
+    app.kubernetes.io/name: matomo
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: matomo-1.0.1
+    app.kubernetes.io/component: app
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      name: http
+  selector:
+    app.kubernetes.io/name: matomo
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/component: app
