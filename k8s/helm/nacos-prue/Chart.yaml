@@ -1,0 +1,8 @@
+apiVersion: v2
+appVersion: 1.4.1
+description: Nacos Server Without DB
+home: https://nacos.io/zh-cn/index.html
+icon: https://nacos.io/img/nacos_colorful.png
+name: nacos
+type: application
+version: 1.1.0

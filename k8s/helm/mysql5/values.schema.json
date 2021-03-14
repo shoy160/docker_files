@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "persistence": {
+      "type": "object",
+      "title": "存储",
+      "form": true,
+      "properties": {
+        "size": {
+          "type": "string",
+          "title": "存储空间大小",
+          "form": true,
+          "default": "8Gi",
+          "render": "slider",
+          "sliderMin": 1,
+          "sliderMax": 100,
+          "sliderUnit": "Gi"
+        }
+      }
+    },
+    "mysqlRootPassword": {
+      "type": "string",
+      "title": "root 密码",
+      "form": true
+    },
+    "timezone": {
+      "type": "string",
+      "title": "时区",
+      "form": true,
+      "default": "Asia/Shanghai"
+    }
+  },
+  "required": ["persistence", "mysqlRootPassword", "timezone"]
+}

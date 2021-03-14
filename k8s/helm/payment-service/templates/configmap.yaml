@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "payment-service.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+data:
+{{- with .Values.config }}
+  appsettings.json: |-
+    {
+      "site": "payment",
+      "mode": "Prod",
+      "configLevel": "All",
+      "dapper": {
+        "default": {
+          "ConnectionString": "server={{ .dbHost }};user={{ .dbUser }};database={{ .dbName }};port={{ .dbPort | default 3306 }};password={{ .dbPassword }};Pooling=true;Charset=utf8;SslMode=none;",
+          "Name": "default",
+          "ProviderName": "mysql"
+        }
+      },
+      "rabbit": {
+        "default": {
+          "host": {{ .rabbitHost | quote }},
+          "port": {{ .rabbitPort | default 5672 }},
+          "user": {{ .rabbitUser | quote }},
+          "password": {{ .rabbitPassword | quote }},
+          "broker": {{ .rabbitBroker | default "payment_event" | quote }},
+          "virtualHost": {{ .rabbitVhost | default "payment" | quote }}
+        }
+      },
+      "const": {
+        "enableStatistic": true
+      },
+      "sites": {
+        "pay": "{{ .site }}"
+      }
+    }
+{{- end }}

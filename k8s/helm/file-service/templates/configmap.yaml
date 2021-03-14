@@ -1,0 +1,26 @@
+{{- if .Values.config.enableMedia }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "file-service.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+data:
+{{- with .Values.config }}
+  application.yml: |-
+    file-server:
+      enable-media: true
+    spring:
+      datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://{{ .dbHost }}:{{ .dbPort | default 3306 }}/{{ .dbName }}?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+        username: {{ .dbUser | quote }}
+        password: {{ .dbPassword | quote }}
+    pagehelper:
+      helperDialect: mysql
+      reasonable: false
+      supportMethodsArguments: true
+      params: count=countSql
+    mybatis-plus:
+      mapper-locations: classpath:mapper/**/*.xml
+{{- end }}
+{{- end }}

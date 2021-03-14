@@ -1,0 +1,61 @@
+---
+# Source: file-service/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: RELEASE-NAME-file-service
+  labels:
+    helm.sh/chart: file-service-0.1.0
+    app.kubernetes.io/name: file-service
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: file-service
+      app.kubernetes.io/instance: RELEASE-NAME
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: file-service
+        app.kubernetes.io/instance: RELEASE-NAME
+    spec:
+      serviceAccountName: RELEASE-NAME-file-service
+      securityContext:
+        {}
+      containers:
+        - name: file-service
+          securityContext:
+            {}
+          image: "hub.app-chengdu1.yunzhicloud.com/yzcloud/file-server:mysql"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: JAVA_OPTS
+              value: '-Xms256m -Xmx1024m'
+            - name: FILESERVER_HOST
+              value: 
+            - name: MINIO_BUCKET
+              value: 
+            - name: MINIO_REGION
+              value: ""
+            - name: MINIO_HOST
+              value: 
+            - name: MINIO_PORT
+              value: "443"
+            - name: MINIO_ACCESSKEY
+              value: 
+            - name: MINIO_SECRETKEY
+              value: 
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2000Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi

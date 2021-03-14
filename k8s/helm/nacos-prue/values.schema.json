@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "mysql": {
+      "type": "object",
+      "title": "Database",
+      "form": true,
+      "properties": {
+        "host": {
+          "type": "string",
+          "title": "DB Host",
+          "form": true
+        },
+        "port": {
+          "type": "integer",
+          "title": "DB Port",
+          "form": true,
+          "default": 3306
+        },
+        "database": {
+          "type": "string",
+          "title": "Database",
+          "form": true,
+          "default": "db_nacos"
+        },
+        "user": {
+          "type": "string",
+          "title": "DB User",
+          "form": true
+        },
+        "password": {
+          "type": "string",
+          "title": "DB Password",
+          "form": true
+        }
+      }
+    }
+  },
+  "required": ["mysql"]
+}

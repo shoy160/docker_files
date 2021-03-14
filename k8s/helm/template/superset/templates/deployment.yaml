@@ -1,0 +1,71 @@
+---
+# Source: superset/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: RELEASE-NAME-superset
+  labels:
+    app: superset
+    chart: superset-1.2.0
+    component: server
+    release: RELEASE-NAME
+    heritage: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: superset
+      component: server
+      release: RELEASE-NAME
+  template:
+    metadata:
+      name: RELEASE-NAME-superset
+      labels:
+        app: superset
+        component: server
+        chart: superset-1.2.0
+        release: RELEASE-NAME
+        heritage: Helm
+      annotations:
+        checksum/secrets: 1ec37f0cf60b90698dae99b7a4589965c2a9978206ce07ff9949a30f7256c5c2
+    spec:
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+      volumes:
+        - name: superset-configs
+          secret:
+            secretName: RELEASE-NAME-superset
+        - name: storage-volume
+          emptyDir: {}
+      containers:
+        - name: superset
+          image: "amancevice/superset:0.35.2"
+          imagePullPolicy: IfNotPresent
+          command: ["/usr/bin/env"]
+          args: ["gunicorn", "-b", "0.0.0.0:8088", "--limit-request-line", "0", "--limit-request-field_size", "0", "superset:app"]
+          volumeMounts:
+            - name: superset-configs
+              mountPath: /home/superset
+            - name: storage-volume
+              mountPath: /var/lib/superset
+          ports:
+            - name: http
+              containerPort: 8088
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 80
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5

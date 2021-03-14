@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "config": {
+      "type": "object",
+      "title": "Config",
+      "form": true,
+      "properties": {
+        "host": {
+          "type": "string",
+          "title": "Minio Host",
+          "form": true,
+          "default": "https://t2.oss-chengdu1.yunzhicloud.com"
+        },
+        "port": {
+          "type": "integer",
+          "title": "Minio Port",
+          "form": true,
+          "default": 443
+        },
+        "bucket": {
+          "type": "string",
+          "title": "Bucket",
+          "form": true,
+          "default": ""
+        },
+        "region": {
+          "type": "string",
+          "title": "Region",
+          "form": true
+        },
+        "accessKey": {
+          "type": "string",
+          "title": "Minio AccessKey",
+          "form": true
+        },
+        "secretKey": {
+          "type": "string",
+          "title": "Minio SecretKey",
+          "form": true
+        },
+        "urlHost": {
+          "type": "string",
+          "title": "Url Host",
+          "form": true
+        },
+        "enableMedia": {
+          "type": "boolean",
+          "title": "Enabled Media",
+          "form": true
+        },
+        "dbHost": {
+          "type": "string",
+          "title": "DB Host",
+          "form": true
+        },
+        "dbPort": {
+          "type": "integer",
+          "title": "DB Port",
+          "form": true,
+          "default": 3306
+        },
+        "dbName": {
+          "type": "string",
+          "title": "DB Name",
+          "form": true
+        },
+        "dbUser": {
+          "type": "string",
+          "title": "DB User",
+          "form": true
+        },
+        "dbPassword": {
+          "type": "string",
+          "title": "DB Password",
+          "form": true
+        }
+      }
+    }
+  },
+  "required": ["config"]
+}

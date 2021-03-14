@@ -1,0 +1,6 @@
+apiVersion: v2
+name: file-service
+description: 云智云 - 文件服务
+type: application
+version: 0.1.3
+appVersion: 1.0.0

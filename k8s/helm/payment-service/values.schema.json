@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "config": {
+      "type": "object",
+      "title": "Config",
+      "form": true,
+      "properties": {
+        "dbHost": {
+          "type": "string",
+          "title": "DB Host",
+          "form": true
+        },
+        "dbPort": {
+          "type": "integer",
+          "title": "DB Port",
+          "form": true,
+          "default": 3306
+        },
+        "dbName": {
+          "type": "string",
+          "title": "DB Name",
+          "form": true
+        },
+        "dbUser": {
+          "type": "string",
+          "title": "DB User",
+          "form": true
+        },
+        "dbPassword": {
+          "type": "string",
+          "title": "DB Password",
+          "form": true
+        },
+        "rabbitHost": {
+          "type": "string",
+          "title": "Rabbit Host",
+          "form": true
+        },
+        "rabbitPort": {
+          "type": "integer",
+          "title": "Rabbit Host",
+          "form": true,
+          "default": 5762
+        },
+        "rabbitVhost": {
+          "type": "string",
+          "title": "Rabbit VHost",
+          "form": true
+        },
+        "rabbitBroker": {
+          "type": "string",
+          "title": "Rabbit Broker",
+          "form": true
+        },
+        "rabbitUser": {
+          "type": "string",
+          "title": "Rabbit User",
+          "form": true
+        },
+        "rabbitPassword": {
+          "type": "string",
+          "title": "Rabbit Password",
+          "form": true
+        },
+        "site": {
+          "type": "string",
+          "title": "Payment Site",
+          "form": true
+        }
+      }
+    }
+  },
+  "required": ["config"]
+}

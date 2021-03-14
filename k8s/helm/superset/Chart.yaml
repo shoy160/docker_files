@@ -1,0 +1,12 @@
+apiVersion: v1
+appVersion: 0.35.2
+description: Apache Superset (incubating) is a modern, enterprise-ready business intelligence
+  web application
+home: https://github.com/apache/incubator-superset
+icon: https://superset.incubator.apache.org/_images/s.png
+keywords:
+- bi
+name: superset
+sources:
+- https://github.com/helm/charts/tree/master/stable/superset
+version: 1.2.0

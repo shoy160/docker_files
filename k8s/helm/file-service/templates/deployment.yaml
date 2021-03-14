@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "file-service.fullname" . }}
+  labels:
+    {{- include "file-service.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "file-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "file-service.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "file-service.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.config.enableMedia}}
+      volumes:
+        - name: {{ include "file-service.fullname" . }}-volume
+          configMap:
+            name: {{ include "file-service.fullname" . }}-config
+            items:
+              - key: application.yml
+                path: application.yml
+            defaultMode: 420
+      {{- end}}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+          {{- with .Values.config }}
+            - name: JAVA_OPTS
+              value: '-Xms256m -Xmx1024m'
+            - name: FILESERVER_ENABLEMEDIA
+              value: {{ .enableMedia | quote }}
+            - name: FILESERVER_HOST
+              value: {{ .urlHost }}
+            - name: MINIO_BUCKET
+              value: {{ .bucket }}
+            - name: MINIO_REGION
+              value: {{ .region | quote | default "" }}
+            - name: MINIO_HOST
+              value: {{ .host }}
+            - name: MINIO_PORT
+              value: {{ .port | quote | default "443" }}
+            - name: MINIO_ACCESSKEY
+              value: {{ .accessKey }}
+            - name: MINIO_SECRETKEY
+              value: {{ .secretKey }}
+          {{- end }}      
+          {{- if .Values.config.enableMedia }}
+          volumeMounts:
+            - name: {{ include "file-service.fullname" . }}-volume
+              readOnly: true
+              mountPath: /publish/config/application.yml
+              subPath: application.yml
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 100
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 80
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
