@@ -1,0 +1,17 @@
+FROM mysql:5.7
+
+ADD mysql_backup.sh /root/
+
+RUN chmod +x /root/mysql_backup.sh
+
+ENV DB_HOST "localhost"
+ENV DB_PORT "3306"
+ENV DB_USER "root"
+ENV DB_DIR "/root/backup"
+ENV DB_PWD ""
+ENV DB_NAME "__all__"
+ENV DB_MAX "31"
+
+ENTRYPOINT [ "sh", "-c", "/root/mysql_backup.sh -h $DB_HOST -P $DB_PORT -u $DB_USER -p $DB_PWD -n $DB_NAME -m $DB_MAX -d $DB_DIR" ]
+
+# docker run -it --rm -v $PWD/backup:/root/backup -e DB_MAX=3 -e DB_HOST= -e DB_PORT=3306 -e DB_PWD= -e DB_NAME=$name shoy160/mysql-backup

@@ -30,3 +30,9 @@ cycle() {
     printf '%s ' "${arr[${i:=0}]}"
     ((i=i>=${#arr[@]}-1?0:++i))
 }
+
+# for i in `seq 0 18`
+# do
+#         host="192.168.5.$(expr 100 + $i)"
+#         echo "$host"
+# done
