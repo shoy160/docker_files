@@ -12,7 +12,7 @@ deploymentStrategy: {}
   # type: RollingUpdate
 
 nexus:
-  imageName: quay.io/travelaudience/docker-nexus
+  imageName: quay.mirrors.ustc.edu.cn/travelaudience/docker-nexus
   imageTag: 3.25.1
   imagePullPolicy: IfNotPresent
   # Uncomment this to scheduler pods on priority
@@ -90,7 +90,7 @@ route:
 nexusProxy:
   enabled: true
   # svcName: proxy-svc
-  imageName: quay.io/travelaudience/docker-nexus-proxy
+  imageName: quay.mirrors.ustc.edu.cn/travelaudience/docker-nexus-proxy
   imageTag: 2.6.0
   imagePullPolicy: IfNotPresent
   port: 8080
@@ -144,7 +144,7 @@ persistence:
 
 nexusBackup:
   enabled: false
-  imageName: quay.io/travelaudience/docker-nexus-backup
+  imageName: quay.mirrors.ustc.edu.cn/travelaudience/docker-nexus-backup
   imageTag: 1.5.0
   imagePullPolicy: IfNotPresent
   env:
